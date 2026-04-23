@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Vote Confirmed — Quantum Voting{% endblock %}
+
+{% block extra_css %}
+<style>
+  .confirm-header { text-align: center; margin-bottom: 2rem; }
+  .confirm-header .big-icon { font-size: 4rem; display: block; animation: pop .4s ease; }
+  @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  /* Quantum detail rows */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  @media (max-width:500px) { .detail-grid { grid-template-columns: 1fr; } }
+  .detail-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+  .detail-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .4rem; }
+  .detail-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .detail-sub { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+  /* Circuit section */
+  .circuit-section { margin: 1.5rem 0; }
+  .circuit-section h2 { margin-bottom: .75rem; font-size: 1rem; }
+  .circuit-img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* Explanation steps */
+  .steps { list-style: none; counter-reset: step; }
+  .steps li {
+    counter-increment: step;
+    display: flex; gap: .75rem; align-items: flex-start;
+    padding: .6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .steps li::before {
+    content: counter(step);
+    min-width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: .7rem;
+    font-family: 'Orbitron', monospace;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .steps li strong { color: var(--text); }
+
+  .actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="confirm-header">
+    <span class="big-icon">⚛️</span>
+    <h1>Vote Recorded!</h1>
+    <p class="subtitle">
+      Your vote for <strong>{{ candidate.name }}</strong> has been quantum-encoded,
+      measured, and stored.
+      {% if is_valid %}
+        <span class="badge badge-ok">✓ No Tampering Detected</span>
+      {% else %}
+        <span class="badge badge-warn">⚠ Tamper Alert Logged</span>
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Quantum metrics -->
+  <div class="detail-grid">
+    <div class="detail-box">
+      <div class="detail-label">Candidate Encoded</div>
+      <div class="detail-value" style="font-size:1rem; color:{{ candidate.color }};">
+        {{ candidate.name }}
+      </div>
+      <div class="detail-sub">{{ candidate.party }}</div>
+    </div>
+    <div class="detail-box">
+      <div class="detail-label">Binary Representation</div>
+      <div class="detail-value">{{ binary_repr }}</div>
+      <div class="detail-sub">Candidate ID in 2-bit binary</div>
+    </div>
+    <div class="detail-box">
+      <div class="detail-label">Quantum State (before measure)</div>
+      <div class="detail-value">|{{ binary_repr }}⟩</div>
+      <div class="detail-sub">Encoded as qubits q[1]q[0]</div>
+    </div>
+    <div class="detail-box">
+      <div class="detail-label">Measured Classical Bits</div>
+      <div class="detail-value">{{ measured }}</div>
+      <div class="detail-sub">Output after Aer simulation</div>
+    </div>
+  </div>
+
+  <!-- Quantum circuit diagram -->
+  {% if circuit_img %}
+  <div class="circuit-section">
+    <h2>🔬 Quantum Circuit Diagram <span class="badge badge-quantum">REAL Qiskit</span></h2>
+    <img class="circuit-img"
+         src="data:image/png;base64,{{ circuit_img }}"
+         alt="Quantum circuit for vote encoding" />
+  </div>
+  {% endif %}
+
+  <hr class="divider" />
+
+  <!-- Step-by-step explanation -->
+  <h2 style="font-size:.95rem; margin-bottom:.75rem;">
+    🧠 What Just Happened? (Step by Step)
+  </h2>
+  <ol class="steps">
+    <li>
+      <strong>Binary encoding:</strong> Candidate ID {{ candidate.id }} → binary
+      <code>{{ binary_repr }}</code> (2-bit).
+    </li>
+    <li>
+      <strong>Qubit initialisation:</strong> 2 qubits start in state |00⟩ by default.
+    </li>
+    <li>
+      <strong>X gates applied:</strong> For each '1' bit, an X (NOT) gate flips
+      that qubit: |0⟩ → |1⟩. Result state: |{{ binary_repr }}⟩.
+    </li>
+    <li>
+      <strong>Measurement:</strong> Qiskit's Aer simulator collapses the quantum
+      state to classical bits: <code>{{ measured }}</code>.
+    </li>
+    <li>
+      <strong>Tamper check:</strong> Re-run the circuit, compare result.
+      {% if is_valid %}Match confirmed — vote integrity ✓{% else %}Mismatch detected — logged ⚠{% endif %}
+    </li>
+    <li>
+      <strong>Storage:</strong> Classical result <code>{{ measured }}</code> stored
+      in SQLite. Your <code>has_voted</code> flag is set (no-cloning enforced).
+    </li>
+  </ol>
+
+  <div class="actions">
+    <a href="{{ url_for('results') }}" class="btn btn-primary">VIEW RESULTS →</a>
+  </div>
+</div>
+{% endblock %}

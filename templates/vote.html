@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Cast Your Vote — Quantum Voting{% endblock %}
+
+{% block extra_css %}
+<style>
+  .vote-header { margin-bottom: 2rem; }
+  .vote-header h1 { margin-bottom: .25rem; }
+
+  /* Candidate grid */
+  .candidates { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  @media (max-width: 600px) { .candidates { grid-template-columns: 1fr; } }
+
+  .candidate-card {
+    position: relative;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    user-select: none;
+  }
+  .candidate-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .candidate-card input[type="radio"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+  .candidate-card.selected {
+    border-color: var(--accent2);
+    box-shadow: 0 0 20px rgba(6,182,212,.25);
+  }
+
+  .candidate-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: .75rem;
+  }
+  .candidate-name {
+    font-family: 'Orbitron', monospace;
+    font-size: .95rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+  .candidate-party { font-size: .78rem; color: var(--muted); }
+  .candidate-id {
+    position: absolute; top: .75rem; right: .75rem;
+    font-family: monospace;
+    font-size: .7rem;
+    color: var(--muted);
+  }
+  .check-icon {
+    position: absolute; bottom: .75rem; right: .75rem;
+    font-size: 1.2rem;
+    display: none;
+  }
+  .candidate-card.selected .check-icon { display: block; }
+
+  /* Quantum info box */
+  .quantum-info {
+    background: rgba(124,58,237,.07);
+    border: 1px solid rgba(124,58,237,.2);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .quantum-info strong { color: #a78bfa; }
+
+  .encoding-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8rem;
+    margin-top: .75rem;
+  }
+  .encoding-table th, .encoding-table td {
+    padding: .4rem .75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .encoding-table th { color: var(--accent2); font-family: 'Orbitron', monospace; font-size: .72rem; }
+  .encoding-table td:last-child { font-family: monospace; color: #a78bfa; }
+
+  .submit-area { text-align: center; }
+  #submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vote-header">
+  <h1>⚛ Cast Your Vote</h1>
+  <p class="subtitle">
+    Welcome, <strong>{{ username }}</strong>. Select one candidate — your vote will be
+    encoded into a quantum circuit and measured.
+  </p>
+</div>
+
+<!-- Quantum explanation box -->
+<div class="quantum-info">
+  <strong>How quantum encoding works:</strong><br/>
+  Your selected candidate is converted to a 2-bit binary number and encoded
+  into 2 qubits. An <strong>X gate</strong> (quantum NOT) flips any qubit that
+  should be |1⟩. Qiskit's Aer simulator then measures the circuit,
+  collapsing the quantum state to a classical bit string.
+  <table class="encoding-table">
+    <thead><tr><th>Candidate</th><th>Binary</th><th>Quantum State</th></tr></thead>
+    <tbody>
+      {% for c in candidates %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.id }}</td>
+        <td>|{{ '{:02b}'.format(c.id) }}⟩</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Candidate cards -->
+<form method="POST" action="{{ url_for('vote') }}" id="vote-form">
+  <div class="candidates">
+    {% for c in candidates %}
+    <label class="candidate-card" id="card-{{ c.id }}" onclick="selectCard({{ c.id }})">
+      <input type="radio" name="candidate" value="{{ c.id }}" id="r{{ c.id }}" />
+      <div class="candidate-id">|{{ '{:02b}'.format(c.id) }}⟩</div>
+      <div class="candidate-avatar" style="background:{{ c.color }}22; color:{{ c.color }};">
+        {{ ['🔬','🌿','⚡','🌐'][loop.index0] }}
+      </div>
+      <div class="candidate-name">{{ c.name }}</div>
+      <div class="candidate-party">{{ c.party }}</div>
+      <div class="check-icon">✅</div>
+    </label>
+    {% endfor %}
+  </div>
+
+  <div class="submit-area">
+    <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+      ENCODE &amp; SUBMIT VOTE →
+    </button>
+    <p style="margin-top:.75rem; font-size:.78rem; color:var(--muted);">
+      ⚠ This action is irreversible. You can vote only once.
+    </p>
+  </div>
+</form>
+
+<script>
+  function selectCard(id) {
+    // Remove 'selected' from all cards
+    document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+    // Add to clicked
+    document.getElementById('card-' + id).classList.add('selected');
+    // Check the radio
+    document.getElementById('r' + id).checked = true;
+    // Enable submit
+    document.getElementById('submit-btn').disabled = false;
+  }
+</script>
+{% endblock %}

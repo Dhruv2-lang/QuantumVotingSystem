@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Register — Quantum Voting{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-header { text-align: center; margin-bottom: 2rem; }
+  .auth-header .icon { font-size: 3rem; display: block; margin-bottom: .5rem; }
+  .auth-footer { text-align: center; margin-top: 1.5rem; font-size: .88rem; color: var(--muted); }
+  .auth-footer a { color: var(--accent2); text-decoration: none; }
+  .auth-footer a:hover { text-decoration: underline; }
+  .card { animation: fadeUp .4s ease both; }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .rules {
+    font-size: .8rem; color: var(--muted);
+    background: rgba(124,58,237,.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:420px;margin:0 auto;">
+  <div class="auth-header">
+    <span class="icon">✨</span>
+    <h1>Register</h1>
+    <p class="subtitle">Create your quantum voter identity</p>
+  </div>
+
+  <div class="rules">
+    🔒 Each user gets <strong>exactly one vote</strong> — enforced by the
+    quantum no-cloning principle &amp; database constraint.
+  </div>
+
+  <form method="POST" action="{{ url_for('register') }}">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username"
+           placeholder="choose_a_username" required autocomplete="username" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password"
+           placeholder="min 4 characters" required autocomplete="new-password" />
+
+    <button type="submit" class="btn btn-primary btn-full" style="margin-top:.5rem;">
+      CREATE ACCOUNT →
+    </button>
+  </form>
+
+  <p class="auth-footer">
+    Already registered?
+    <a href="{{ url_for('login') }}">Log in</a>
+  </p>
+</div>
+{% endblock %}

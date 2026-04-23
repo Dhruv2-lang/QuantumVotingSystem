@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Results — Quantum Voting{% endblock %}
+
+{% block extra_css %}
+<style>
+  .results-header { margin-bottom: 2rem; }
+  .results-header h1 { margin-bottom: .25rem; }
+
+  .total-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(6,182,212,.1);
+    border: 1px solid rgba(6,182,212,.3);
+    color: var(--accent2);
+    padding: .35rem 1rem;
+    border-radius: 99px;
+    font-size: .82rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Candidate result rows */
+  .result-row {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: .75rem;
+    transition: border-color .2s;
+  }
+  .result-row:first-child { border-color: var(--accent2); }  /* winner */
+
+  .result-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .6rem;
+  }
+  .result-name {
+    font-family: 'Orbitron', monospace;
+    font-size: .95rem;
+    font-weight: 700;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .result-party { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+  .result-count {
+    text-align: right;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+  }
+  .result-pct { font-size: .78rem; color: var(--muted); }
+
+  /* Progress bar */
+  .progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+  }
+
+  .rank-1 .result-count { color: var(--accent2); }
+  .winner-crown { display: none; }
+  .rank-1 .winner-crown { display: inline; }
+
+  /* Quantum encoding reference */
+  .encoding-ref {
+    background: rgba(124,58,237,.07);
+    border: 1px solid rgba(124,58,237,.2);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-top: 1.5rem;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  .encoding-ref table { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+  .encoding-ref td { padding: .3rem .5rem; }
+  .encoding-ref td:last-child { font-family: monospace; color: #a78bfa; }
+
+  .actions { text-align: center; margin-top: 2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-header">
+  <h1>📊 Live Results</h1>
+  <p class="subtitle">Quantum-measured vote tally — updated in real time.</p>
+</div>
+
+<div class="total-badge">
+  ⚛ <strong>{{ total_votes }}</strong> quantum vote{{ 's' if total_votes != 1 }} recorded
+</div>
+
+{% if results %}
+  {% for r in results %}
+  <div class="result-row rank-{{ loop.index }}">
+    <div class="result-top">
+      <div>
+        <div class="result-name">
+          <span class="winner-crown">👑</span>
+          {{ r.name }}
+          <span class="badge badge-quantum">|{{ '{:02b}'.format(r.id) }}⟩</span>
+        </div>
+        <div class="result-party">{{ r.party }}</div>
+      </div>
+      <div>
+        <div class="result-count">{{ r.votes }}</div>
+        <div class="result-pct">{{ r.percent }}%</div>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill"
+           style="width:{{ r.percent }}%; background:{{ r.color }};"></div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div style="text-align:center; color:var(--muted); padding:3rem 0;">
+    No votes have been cast yet. Be the first to vote!
+  </div>
+{% endif %}
+
+<!-- Quantum encoding reference -->
+<div class="encoding-ref">
+  <strong style="color:#a78bfa;">Quantum encoding reference</strong> — each vote is
+  stored as a classical bit-string produced by Qiskit's Aer measurement:
+  <table>
+    {% for r in results %}
+    <tr>
+      <td>{{ r.name }}</td>
+      <td>Candidate {{ r.id }}</td>
+      <td>binary {{ '{:02b}'.format(r.id) }}</td>
+      <td>→ measured as "{{ '{:02b}'.format(r.id) }}"</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="actions">
+  {% if not has_voted %}
+    <a href="{{ url_for('vote') }}" class="btn btn-primary">CAST YOUR VOTE →</a>
+  {% else %}
+    <p style="color:var(--muted); font-size:.88rem;">
+      ✅ You have already voted. Thank you for participating!
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

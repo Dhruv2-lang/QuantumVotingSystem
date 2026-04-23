@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Security Log — Quantum Voting{% endblock %}
+
+{% block extra_css %}
+<style>
+  .security-header { margin-bottom: 2rem; }
+  .security-header h1 { margin-bottom: .25rem; }
+
+  /* Status banner */
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    font-size: .95rem;
+  }
+  .status-banner.danger {
+    background: rgba(239,68,68,.1);
+    border: 1px solid rgba(239,68,68,.4);
+    color: #fca5a5;
+  }
+  .status-banner.safe {
+    background: rgba(16,185,129,.1);
+    border: 1px solid rgba(16,185,129,.4);
+    color: #6ee7b7;
+  }
+  .status-icon { font-size: 2rem; }
+  .status-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+  .status-sub { font-size: .82rem; opacity: .8; }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 500px) { .stats-row { grid-template-columns: 1fr; } }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+  }
+  .stat-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: .25rem;
+  }
+  .stat-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+  /* Log entries */
+  .log-title {
+    font-family: 'Orbitron', monospace;
+    font-size: .9rem;
+    margin-bottom: 1rem;
+    color: var(--accent2);
+  }
+
+  .log-entry {
+    background: var(--bg);
+    border: 1px solid rgba(239,68,68,.3);
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: .75rem;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform: translateX(-10px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .log-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .75rem;
+  }
+  .log-entry-title {
+    font-family: 'Orbitron', monospace;
+    font-size: .82rem;
+    color: #ef4444;
+    font-weight: 700;
+  }
+  .log-time {
+    font-size: .75rem;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  .log-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: .75rem;
+  }
+  @media (max-width: 500px) { .log-detail-grid { grid-template-columns: 1fr; } }
+  .log-detail {
+    background: rgba(239,68,68,.05);
+    border: 1px solid rgba(239,68,68,.15);
+    border-radius: 6px;
+    padding: .6rem .85rem;
+  }
+  .log-detail-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .3rem; }
+  .log-detail-value { font-family: 'Orbitron', monospace; font-size: 1.1rem; font-weight: 700; }
+  .log-detail-value.expected { color: #10b981; }
+  .log-detail-value.found    { color: #ef4444; }
+  .log-detail-value.voteid   { color: var(--accent2); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--muted);
+  }
+  .empty-state .big { font-size: 3rem; margin-bottom: 1rem; }
+
+  .actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-header">
+  <h1>🛡 Security Log</h1>
+  <p class="subtitle">Quantum tamper detection — real-time integrity monitor</p>
+</div>
+
+<!-- Status banner -->
+{% if tamper_logs %}
+<div class="status-banner danger">
+  <div class="status-icon">🚨</div>
+  <div>
+    <div class="status-title">TAMPERING DETECTED</div>
+    <div class="status-sub">{{ tamper_logs|length }} tamper attempt(s) logged. Vote integrity has been compromised.</div>
+  </div>
+</div>
+{% else %}
+<div class="status-banner safe">
+  <div class="status-icon">✅</div>
+  <div>
+    <div class="status-title">ALL VOTES SECURE</div>
+    <div class="status-sub">No tampering detected. All quantum measurements match stored values.</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-number" style="color:var(--accent2);">{{ total_votes }}</div>
+    <div class="stat-label">Total Votes</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-number" style="color:#10b981;">{{ total_votes - tamper_logs|length }}</div>
+    <div class="stat-label">Secure Votes</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-number" style="color:#ef4444;">{{ tamper_logs|length }}</div>
+    <div class="stat-label">Tampered Votes</div>
+  </div>
+</div>
+
+<!-- Tamper log entries -->
+{% if tamper_logs %}
+  <div class="log-title">⚠ TAMPER INCIDENTS</div>
+  {% for log in tamper_logs %}
+  <div class="log-entry">
+    <div class="log-entry-header">
+      <div class="log-entry-title">⚠ TAMPER INCIDENT #{{ loop.index }}</div>
+      <div class="log-time">{{ log.timestamp }}</div>
+    </div>
+    <div class="log-detail-grid">
+      <div class="log-detail">
+        <div class="log-detail-label">Vote ID</div>
+        <div class="log-detail-value voteid">#{{ log.vote_id }}</div>
+      </div>
+      <div class="log-detail">
+        <div class="log-detail-label">Expected (Quantum)</div>
+        <div class="log-detail-value expected">{{ log.expected }}</div>
+      </div>
+      <div class="log-detail">
+        <div class="log-detail-label">Found (Tampered)</div>
+        <div class="log-detail-value found">{{ log.found }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="empty-state">
+    <div class="big">🔒</div>
+    <p>No tamper attempts detected yet.</p>
+    <p style="font-size:.82rem; margin-top:.5rem;">
+      Run the hacker attack in terminal to simulate tampering.
+    </p>
+  </div>
+{% endif %}
+
+<div class="actions">
+  <a href="{{ url_for('results') }}" class="btn btn-secondary">← RESULTS</a>
+  <a href="{{ url_for('security') }}" class="btn btn-primary">🔄 REFRESH</a>
+</div>
+{% endblock %}

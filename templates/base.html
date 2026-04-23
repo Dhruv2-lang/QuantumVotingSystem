@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Quantum Voting System{% endblock %}</title>
+
+  <!-- Google Fonts: Orbitron (display) + Syne (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────── */
+    :root {
+      --bg:        #05050f;
+      --surface:   #0d0d1f;
+      --border:    #1e1e3a;
+      --accent:    #7c3aed;
+      --accent2:   #06b6d4;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --danger:    #ef4444;
+      --success:   #10b981;
+      --warning:   #f59e0b;
+      --radius:    12px;
+      --glow:      0 0 24px rgba(124,58,237,0.35);
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      /* animated grid background */
+      background-image:
+        linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* ─── NAVBAR ────────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,31,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: .05em;
+      color: var(--accent2);
+      text-decoration: none;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-brand span.dot { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-user {
+      font-size: .8rem;
+      color: var(--accent2);
+      padding: .3rem .75rem;
+      border: 1px solid rgba(6,182,212,.3);
+      border-radius: 99px;
+    }
+
+    /* ─── MAIN WRAPPER ──────────────────────────────── */
+    main {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ─── CARD ──────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      box-shadow: var(--glow);
+    }
+
+    /* ─── HEADINGS ──────────────────────────────────── */
+    h1, h2 {
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .05em;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: .5rem; }
+    h2 { font-size: 1.3rem; margin-bottom: 1rem; }
+    .subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 2rem; }
+
+    /* ─── FORM ELEMENTS ─────────────────────────────── */
+    label {
+      display: block;
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem;
+      margin-bottom: 1.25rem;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.2);
+    }
+
+    /* ─── BUTTONS ───────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: .75rem 2rem;
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #6d28d9;
+      box-shadow: 0 0 20px rgba(124,58,237,.5);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+    }
+    .btn-secondary:hover {
+      background: rgba(6,182,212,.1);
+    }
+    .btn-full { width: 100%; text-align: center; }
+
+    /* ─── FLASH MESSAGES ────────────────────────────── */
+    .flash { border-radius: 8px; padding: .85rem 1.2rem; margin-bottom: 1.5rem; font-size: .9rem; }
+    .flash.error   { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: #fca5a5; }
+    .flash.success { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.3); color: #6ee7b7; }
+    .flash.info    { background: rgba(6,182,212,.1);  border: 1px solid rgba(6,182,212,.3);  color: #67e8f9; }
+
+    /* ─── DIVIDER ───────────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+    /* ─── TAG / BADGE ───────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .06em;
+      padding: .2rem .6rem;
+      border-radius: 99px;
+      vertical-align: middle;
+    }
+    .badge-quantum { background: rgba(124,58,237,.2); color: #a78bfa; border: 1px solid rgba(124,58,237,.4); }
+    .badge-ok      { background: rgba(16,185,129,.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,.4); }
+    .badge-warn    { background: rgba(239,68,68,.2);  color: #fca5a5; border: 1px solid rgba(239,68,68,.4); }
+
+    /* ─── FOOTER ────────────────────────────────────── */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .75rem;
+      padding: 2rem 0;
+      letter-spacing: .04em;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAVBAR ────────────────────────────────────────── -->
+<nav>
+  <a class="nav-brand" href="/">⚛ Quantum<span class="dot">Vote</span></a>
+  <div class="nav-links">
+    {% if session.get('user_id') %}
+      <span class="nav-user">{{ session.username }}</span>
+      <a href="{{ url_for('results') }}">Results</a>
+      <a href="{{ url_for('security') }}">🛡 Security</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- ── FLASH MESSAGES ─────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="max-width:800px;margin:1rem auto;padding:0 1.5rem;">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── PAGE CONTENT ──────────────────────────────────── -->
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  Quantum Voting System &nbsp;·&nbsp; CS Course Project &nbsp;·&nbsp;
+  Powered by Flask + Qiskit
+</footer>
+
+</body>
+</html>
