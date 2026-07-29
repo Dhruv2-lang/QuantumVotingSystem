@@ -134,3 +134,13 @@ The database (`database.db`) is created automatically on first run. The app will
 
 This project was developed for academic purposes as a Computer Science course project.
 
+## Team
+
+| Name | Registration No. |
+|---|---|
+| Dhruv Pratap Singh | RA2411026010146 |
+| Dhruv Mahajan | RA2411026010185 |
+
+### Guide
+
+Dr. Gayathri
