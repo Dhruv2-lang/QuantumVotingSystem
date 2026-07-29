@@ -4,6 +4,18 @@
 
 A web-based voting application that uses **real quantum circuit simulation** (via IBM's Qiskit) to encode and "cast" each vote, alongside conceptual demonstrations of quantum-inspired security properties like no-cloning and tamper detection.
 
+## Team
+
+| Name | Registration No. |
+|---|---|
+| Dhruv Pratap Singh | RA2411026010146 |
+| Dhruv Mahajan | RA2411026010185 |
+
+### Guide
+
+Dr. Gayathri
+
+
 ## What Is "Quantum" Here?
 
 This project combines a **real** quantum simulation layer with **conceptual** analogies to quantum security properties:
@@ -134,13 +146,3 @@ The database (`database.db`) is created automatically on first run. The app will
 
 This project was developed for academic purposes as a Computer Science course project.
 
-## Team
-
-| Name | Registration No. |
-|---|---|
-| Dhruv Pratap Singh | RA2411026010146 |
-| Dhruv Mahajan | RA2411026010185 |
-
-### Guide
-
-Dr. Gayathri
