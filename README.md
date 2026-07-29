@@ -46,18 +46,19 @@ This project combines a **real** quantum simulation layer with **conceptual** an
 - **Security / Tamper Log** — displays any detected mismatches between a stored vote and its re-measured value
 
 ## Project Structure
+
 QuantumVotingSystem/
-├── app.py # Main Flask application (routes, quantum logic, DB)
-├── database.db # SQLite database (created on first run)
-├── templates/
-│ ├── base.html # Base layout
-│ ├── login.html # Login page
-│ ├── register.html # Registration page
-│ ├── vote.html # Candidate selection / voting page
-│ ├── confirmed.html # Vote confirmation with circuit diagram
-│ ├── results.html # Live results dashboard
-│ └── security.html # Tamper detection log
-└── README.md
+    ├── app.py                  # Main Flask application (routes, quantum logic, DB)
+    ├── database.db              # SQLite database (created on first run)
+    ├── templates/
+    │   ├── base.html             # Base layout
+    │   ├── login.html            # Login page
+    │   ├── register.html         # Registration page
+    │   ├── vote.html              # Candidate selection / voting page
+    │   ├── confirmed.html         # Vote confirmation with circuit diagram
+    │   ├── results.html           # Live results dashboard
+    │   └── security.html          # Tamper detection log
+    └── README.md
 
 ## How Vote Encoding Works
 
